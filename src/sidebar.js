@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import Rnd from 'react-resizable-box';
 
 const CANCEL_DISTANCE_ON_SCROLL = 20;
 
@@ -77,6 +78,7 @@ class Sidebar extends Component {
     this.onTouchEnd = this.onTouchEnd.bind(this);
     this.onScroll = this.onScroll.bind(this);
     this.saveSidebarRef = this.saveSidebarRef.bind(this);
+    this.handleSidebarResize = this.handleSidebarResize.bind(this);
   }
 
   componentDidMount() {
@@ -181,10 +183,17 @@ class Sidebar extends Component {
     }
   }
 
+  handleSidebarResize(e, dir, ref) {
+    const width = ref.offsetWidth;
+    if (width !== this.state.sidebarWidth) {
+      this.setState({ sidebarWidth: width });
+    }
+  }
+
   saveSidebarWidth() {
     const width = this.sidebar.offsetWidth;
 
-    if (width !== this.state.sidebarWidth) {
+    if (width !== this.state.sidebarWidth && typeof width !== 'undefined') {
       this.setState({sidebarWidth: width});
     }
   }
@@ -215,6 +224,46 @@ class Sidebar extends Component {
       return this.state.sidebarWidth - this.state.touchStartX + this.state.touchCurrentX;
     }
     return Math.min(this.state.touchCurrentX, this.state.sidebarWidth);
+  }
+
+  renderSidebar(styles) {
+    if (this.props.resizable) {
+      const { pullRight } = this.props;
+      return (
+        <Rnd
+          className={this.props.sidebarClassName}
+          enable={{
+            top: false,
+            right: !pullRight,
+            left: pullRight,
+            bottom: false,
+            topRight: false,
+            bottomRight: false,
+            topLeft: false,
+            bottomLeft: false,
+          }}
+          style={styles}
+          ref={this.saveSidebarRef}
+          bounds="parent"
+          width={this.props.defaultSidebarWidth}
+          height="100%"
+          minWidth={this.props.sidebarMinWidth || 250}
+          minHeight={this.props.sidebarMinHeight}
+          maxWidth={this.props.sidebarMaxWidth || 500}
+          maxHeight={this.props.sidebarMaxHeight}
+          onResize={this.handleSidebarResize}
+        >
+          <div>
+            {this.props.sidebar}
+          </div>
+        </Rnd>
+      )
+    }
+    return (
+      <div className={this.props.sidebarClassName} style={styles} ref={this.saveSidebarRef}>
+        {this.props.sidebar}
+      </div>
+    )
   }
 
   render() {
@@ -319,9 +368,7 @@ class Sidebar extends Component {
 
     return (
       <div {...rootProps}>
-        <div className={this.props.sidebarClassName} style={sidebarStyle} ref={this.saveSidebarRef}>
-          {this.props.sidebar}
-        </div>
+        {this.renderSidebar(sidebarStyle)}
         <div className={this.props.overlayClassName}
              style={overlayStyle}
              role="presentation"
@@ -338,6 +385,11 @@ class Sidebar extends Component {
 }
 
 Sidebar.propTypes = {
+  sidebarMinWidth: PropTypes.number,
+  sidebarMinHeight: PropTypes.number,
+  sidebarMaxWidth: PropTypes.number,
+  sidebarMaxHeight: PropTypes.number,
+  resizable: PropTypes.bool,
   // main content to render
   children: PropTypes.node.isRequired,
 
@@ -407,7 +459,7 @@ Sidebar.defaultProps = {
   dragToggleDistance: 30,
   onSetOpen: () => {},
   styles: {},
-  defaultSidebarWidth: 0,
+  defaultSidebarWidth: 250,
 };
 
 export default Sidebar;

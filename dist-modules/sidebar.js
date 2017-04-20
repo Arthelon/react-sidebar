@@ -18,6 +18,10 @@ var _propTypes = require('prop-types');
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
 
+var _reactResizableBox = require('react-resizable-box');
+
+var _reactResizableBox2 = _interopRequireDefault(_reactResizableBox);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -106,6 +110,7 @@ var Sidebar = function (_Component) {
     _this.onTouchEnd = _this.onTouchEnd.bind(_this);
     _this.onScroll = _this.onScroll.bind(_this);
     _this.saveSidebarRef = _this.saveSidebarRef.bind(_this);
+    _this.handleSidebarResize = _this.handleSidebarResize.bind(_this);
     return _this;
   }
 
@@ -222,11 +227,19 @@ var Sidebar = function (_Component) {
       }
     }
   }, {
+    key: 'handleSidebarResize',
+    value: function handleSidebarResize(e, dir, ref) {
+      var width = ref.offsetWidth;
+      if (width !== this.state.sidebarWidth) {
+        this.setState({ sidebarWidth: width });
+      }
+    }
+  }, {
     key: 'saveSidebarWidth',
     value: function saveSidebarWidth() {
       var width = this.sidebar.offsetWidth;
 
-      if (width !== this.state.sidebarWidth) {
+      if (width !== this.state.sidebarWidth && typeof width !== 'undefined') {
         this.setState({ sidebarWidth: width });
       }
     }
@@ -261,6 +274,50 @@ var Sidebar = function (_Component) {
         return this.state.sidebarWidth - this.state.touchStartX + this.state.touchCurrentX;
       }
       return Math.min(this.state.touchCurrentX, this.state.sidebarWidth);
+    }
+  }, {
+    key: 'renderSidebar',
+    value: function renderSidebar(styles) {
+      if (this.props.resizable) {
+        var pullRight = this.props.pullRight;
+
+        return _react2.default.createElement(
+          _reactResizableBox2.default,
+          {
+            className: this.props.sidebarClassName,
+            enable: {
+              top: false,
+              right: !pullRight,
+              left: pullRight,
+              bottom: false,
+              topRight: false,
+              bottomRight: false,
+              topLeft: false,
+              bottomLeft: false
+            },
+            style: styles,
+            ref: this.saveSidebarRef,
+            bounds: 'parent',
+            width: this.props.defaultSidebarWidth,
+            height: '100%',
+            minWidth: this.props.sidebarMinWidth || 250,
+            minHeight: this.props.sidebarMinHeight,
+            maxWidth: this.props.sidebarMaxWidth || 500,
+            maxHeight: this.props.sidebarMaxHeight,
+            onResize: this.handleSidebarResize
+          },
+          _react2.default.createElement(
+            'div',
+            null,
+            this.props.sidebar
+          )
+        );
+      }
+      return _react2.default.createElement(
+        'div',
+        { className: this.props.sidebarClassName, style: styles, ref: this.saveSidebarRef },
+        this.props.sidebar
+      );
     }
   }, {
     key: 'render',
@@ -366,11 +423,7 @@ var Sidebar = function (_Component) {
       return _react2.default.createElement(
         'div',
         rootProps,
-        _react2.default.createElement(
-          'div',
-          { className: this.props.sidebarClassName, style: sidebarStyle, ref: this.saveSidebarRef },
-          this.props.sidebar
-        ),
+        this.renderSidebar(sidebarStyle),
         _react2.default.createElement('div', { className: this.props.overlayClassName,
           style: overlayStyle,
           role: 'presentation',
@@ -391,6 +444,11 @@ var Sidebar = function (_Component) {
 }(_react.Component);
 
 Sidebar.propTypes = {
+  sidebarMinWidth: _propTypes2.default.number,
+  sidebarMinHeight: _propTypes2.default.number,
+  sidebarMaxWidth: _propTypes2.default.number,
+  sidebarMaxHeight: _propTypes2.default.number,
+  resizable: _propTypes2.default.bool,
   // main content to render
   children: _propTypes2.default.node.isRequired,
 
@@ -460,7 +518,7 @@ Sidebar.defaultProps = {
   dragToggleDistance: 30,
   onSetOpen: function onSetOpen() {},
   styles: {},
-  defaultSidebarWidth: 0
+  defaultSidebarWidth: 250
 };
 
 exports.default = Sidebar;
