@@ -253,9 +253,7 @@ class Sidebar extends Component {
           maxHeight={this.props.sidebarMaxHeight}
           onResize={this.handleSidebarResize}
         >
-          <div>
-            {this.props.sidebar}
-          </div>
+          {this.props.sidebar}
         </Rnd>
       )
     }

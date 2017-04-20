@@ -306,11 +306,7 @@ var Sidebar = function (_Component) {
             maxHeight: this.props.sidebarMaxHeight,
             onResize: this.handleSidebarResize
           },
-          _react2.default.createElement(
-            'div',
-            null,
-            this.props.sidebar
-          )
+          this.props.sidebar
         );
       }
       return _react2.default.createElement(
